@@ -1,6 +1,7 @@
 package com.example.calculatorapp
 
 import android.os.Bundle
+import java.util.*
 import android.widget.Button
 import android.widget.EditText
 import androidx.activity.enableEdgeToEdge
@@ -117,22 +118,54 @@ class MainActivity : AppCompatActivity() {
             val currentText = edt.text.toString()
             edt.setText(currentText + "-")
         }
+
         equal_btn.setOnClickListener {
-            val expression = edt.text.toString()
-            if (expression.isNotEmpty()){
-                val parts = expression.split(Regex("[-+x/]"))
-                var result = parts[0].toDouble()
-                for (i in 1 until parts.size) {
-                    val operator = expression[parts[i-1].length]
-                    when (operator) {
-                        '+' -> result += parts[i].toDouble()
-                        '-' -> result -= parts[i].toDouble()
-                        'x' -> result *= parts[i].toDouble()
-                        '/' -> result /= parts[i].toDouble()
+            var expression = edt.text.toString()
+            if (expression.isNotEmpty()) {
+                try {
+                    if (!expression.contains(Regex("[-+x/.]"))) {
+                        if (expression.endsWith("%")) {
+                            expression = (expression.substring(0, expression.length - 1).toDouble() / 100).toString()
+                        }
+                        edt.setText(expression.toString())
+                    }
+                    val parts = expression.split(Regex("[-+x/]")).toMutableList()
+                    if (parts[0].endsWith("%"))
+                    {
+                        parts[0] = (parts[0].substring(0, parts[0].length - 1).toDouble() / 100).toString()
+                    }
+                    var result = parts[0].toDouble()
+                    var accumulatedLength = parts[0].length
+                    for (i in 1 until parts.size) {
+                        val operator = expression[accumulatedLength]
+                        if (parts[i].endsWith("%"))
+                        {
+                            parts[i] = (parts[i].substring(0, parts[i].length - 1).toDouble() / 100).toString()
+                        }
+                        when (operator) {
+                            '+' -> result += parts[i].toDouble()
+                            '-' -> result -= parts[i].toDouble()
+                            'x' -> result *= parts[i].toDouble()
+                            '/' ->  {
+                                if (parts[i].toDouble() != 0.0) {
+                                    result /= parts[i].toDouble()
+                                } else {
+                                    edt.setText("CAN NOT DIVIDE BY ZERO")
+                                    return@setOnClickListener
+                                }
+                            }
+                        }
+                        accumulatedLength += parts[i].length + 1
+                    }
+                    edt.setText(result.toString())
+                } catch (e: Exception) {
+                    edt.setText("Error")
                 }
             }
-                edt.setText(result.toString())
-            }
         }
+
+
+
+
     }
 }
