@@ -1,8 +1,5 @@
 package com.example.calculatorapp
-
 import android.os.Bundle
-import android.view.View
-import java.util.*
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -123,7 +120,6 @@ class MainActivity : AppCompatActivity() {
             val currentText = edt.text.toString()
             edt.setText(currentText + "-")
         }
-
         equal_btn.setOnClickListener {
             var expression = edt.text.toString()
             if (expression.isNotEmpty()) {
@@ -169,9 +165,5 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-
-
-
-
     }
 }
