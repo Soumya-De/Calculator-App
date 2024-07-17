@@ -1,9 +1,11 @@
 package com.example.calculatorapp
 
 import android.os.Bundle
+import android.view.View
 import java.util.*
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -19,6 +21,7 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        val warning_txt = findViewById<TextView>(R.id.warning_txt)
         val edt = findViewById<EditText>(R.id.edt)
         val AC_btn = findViewById<Button>(R.id.AC_btn)
         val C_btn = findViewById<Button>(R.id.C_btn)
@@ -91,8 +94,10 @@ class MainActivity : AppCompatActivity() {
         }
         AC_btn.setOnClickListener {
             edt.setText("")
+            warning_txt.setText("")
         }
         C_btn.setOnClickListener {
+            warning_txt.setText("")
             val currentText = edt.text.toString()
             if (currentText.isNotEmpty()) {
                 edt.setText(currentText.substring(0, currentText.length - 1))
@@ -150,7 +155,8 @@ class MainActivity : AppCompatActivity() {
                                 if (parts[i].toDouble() != 0.0) {
                                     result /= parts[i].toDouble()
                                 } else {
-                                    edt.setText("CAN NOT DIVIDE BY ZERO")
+                                    warning_txt.setText("CANNOT DIVIDE BY ZERO")
+
                                     return@setOnClickListener
                                 }
                             }
@@ -159,7 +165,7 @@ class MainActivity : AppCompatActivity() {
                     }
                     edt.setText(result.toString())
                 } catch (e: Exception) {
-                    edt.setText("Error")
+                    warning_txt.setText("INVALID INPUT")
                 }
             }
         }
