@@ -124,40 +124,55 @@ class MainActivity : AppCompatActivity() {
             var expression = edt.text.toString()
             if (expression.isNotEmpty()) {
                 try {
-                    if (!expression.contains(Regex("[-+x/.]"))) {
-                        if (expression.endsWith("%")) {
-                            expression = (expression.substring(0, expression.length - 1).toDouble() / 100).toString()
-                        }
-                        edt.setText(expression.toString())
+                    expression = expression.replace(Regex("([0-9]+)%")) {
+                        (it.value.substring(0, it.value.length - 1).toDouble() / 100).toString()
                     }
-                    val parts = expression.split(Regex("[-+x/]")).toMutableList()
-                    if (parts[0].endsWith("%"))
-                    {
-                        parts[0] = (parts[0].substring(0, parts[0].length - 1).toDouble() / 100).toString()
-                    }
-                    var result = parts[0].toDouble()
-                    var accumulatedLength = parts[0].length
-                    for (i in 1 until parts.size) {
-                        val operator = expression[accumulatedLength]
-                        if (parts[i].endsWith("%"))
-                        {
-                            parts[i] = (parts[i].substring(0, parts[i].length - 1).toDouble() / 100).toString()
-                        }
-                        when (operator) {
-                            '+' -> result += parts[i].toDouble()
-                            '-' -> result -= parts[i].toDouble()
-                            'x' -> result *= parts[i].toDouble()
-                            '/' ->  {
-                                if (parts[i].toDouble() != 0.0) {
-                                    result /= parts[i].toDouble()
-                                } else {
-                                    warning_txt.setText("CANNOT DIVIDE BY ZERO")
+                    val numbers = mutableListOf<Double>()
+                    val operators = mutableListOf<Char>()
 
+                    var currentNumber = ""
+
+                    for (char in expression) {
+                        when (char) {
+                            '+', '-', 'x', '/' -> {
+                                if (currentNumber.isNotEmpty()) {
+                                    numbers.add(currentNumber.toDouble())
+                                    currentNumber = ""
+                                }
+                                operators.add(char)
+                            }
+                            else -> {
+                                currentNumber += char
+                            }
+                        }
+                    }
+                    if (currentNumber.isNotEmpty()) {
+                        numbers.add(currentNumber.toDouble())
+                    }
+                    var i = 0
+                    while (i < operators.size) {
+                        if (operators[i] == 'x' || operators[i] == '/') {
+                            val num1 = numbers[i]
+                            val num2 = numbers[i + 1]
+                            val result = if (operators[i] == 'x') num1 * num2 else {
+                                if (num2 != 0.0) num1 / num2 else {
+                                    warning_txt.setText("CANNOT DIVIDE BY ZERO")
                                     return@setOnClickListener
                                 }
                             }
+                            numbers[i] = result
+                            numbers.removeAt(i + 1)
+                            operators.removeAt(i)
+                        } else {
+                            i++
                         }
-                        accumulatedLength += parts[i].length + 1
+                    }
+                    var result = numbers[0]
+                    for (j in 1 until numbers.size) {
+                        when (operators[j - 1]) {
+                            '+' -> result += numbers[j]
+                            '-' -> result -= numbers[j]
+                        }
                     }
                     edt.setText(result.toString())
                 } catch (e: Exception) {
@@ -165,5 +180,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+
+
+
     }
 }
